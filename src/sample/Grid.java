@@ -63,13 +63,12 @@ public class Grid {
 
         for (int y = 0; y < field.length; y++) {
             for (int x = 0; x < field[y].length; x++) {
-                int c = field[y][x].countNeighbourBombs(field);
-                System.out.println("BOMS " + c);
+                field[y][x].countNeighbourBombs(field);
             }
         }
     }
 
-    public void setupCanvas(Canvas canvas) {
+    private void setupCanvas(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         canvas.setOnMouseClicked(event -> {
@@ -98,7 +97,7 @@ public class Grid {
             Cell cell = field[row][col];
             cell.openCell(field, gc);
 
-            System.out.println("Row " + row + "Column " + col);
+       //     System.out.println("Row " + row + " Column " + col);
         });
 
         for (int y = 0; y < field.length; y++) {
@@ -112,7 +111,7 @@ public class Grid {
     private class Pair {
         int column, row;
 
-        public Pair(int column, int row) {
+        private Pair(int column, int row) {
             this.column = column;
             this.row = row;
         }

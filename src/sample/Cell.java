@@ -28,7 +28,7 @@ public class Cell {
         neighbourBombs = 0;
     }
 
-    public void drawCell(GraphicsContext gc) {
+    private void drawCell(GraphicsContext gc) {
         gc.setFill(Color.GRAY);
         if (isBomb()) {
             gc.fillOval(getX() + Grid.CELL_WIDTH * .25, getY() + Grid.CELL_WIDTH * .25, 10, 10);
@@ -66,27 +66,15 @@ public class Cell {
         return x;
     }
 
-    public void setX(double x) {
-        this.x = x;
-    }
-
     public double getY() {
         return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
     }
 
     public double getWidth() {
         return width;
     }
 
-    public void setWidth(double width) {
-        this.width = width;
-    }
-
-    public int countNeighbourBombs(Cell[][] field) {
+    public void countNeighbourBombs(Cell[][] field) {
         int c = 0;
         for (int y = -1; y <= 1; y++) {
             for (int x = -1; x <= 1; x++) {
@@ -100,7 +88,6 @@ public class Cell {
             }
         }
         neighbourBombs = c;
-        return c;
     }
 
     private void floodFillNeighbours(GraphicsContext gc, Cell[][] field) {
