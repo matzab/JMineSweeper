@@ -12,11 +12,12 @@ package sample;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Stack;
 
 public class Grid {
     private int totalBombs = 10;
@@ -72,44 +73,35 @@ public class Grid {
 
     private void setupCanvas(Canvas canvas) {
         GraphicsContext gc = canvas.getGraphicsContext2D();
+        Stack<Cell> cells = new Stack<>();
+
+        canvas.setOnMouseMoved(event -> {
+            double x = event.getX();
+            double y = event.getY();
+            if (!cells.isEmpty()) {
+                Cell tmp = cells.pop();
+                clearHighlight(gc, tmp, x, y);
+            }
+            Cell cell = currentCell(x, y);
+            cell.highLightCell(gc);
+//            System.out.println("Current cell X " + cell.getX()+ " Y " + cell.getY());
+            cells.push(cell);
+//            System.out.println();
+        });
 
         canvas.setOnMouseClicked(event -> {
             double x = event.getX();
             double y = event.getY();
 
-
-            int row, col;
-
-            if (x < CELL_WIDTH && y < CELL_WIDTH) {
-                col = 0;
-                row = 0;
-            } else if (y == GRID_WIDTH - 1 && x == GRID_WIDTH - 1) {
-                col = (int) Math.floor(x / CELL_WIDTH) - 1;
-                row = (int) Math.floor(y / CELL_WIDTH) - 1;
-            } else if (x == GRID_WIDTH - 1) {
-                col = (int) Math.floor(x / CELL_WIDTH) - 1;
-                row = (int) Math.floor(y / CELL_WIDTH);
-            } else if (y == GRID_WIDTH - 1) {
-                col = (int) Math.floor(x / CELL_WIDTH);
-                row = (int) Math.floor(y / CELL_WIDTH) - 1;
-            } else {
-                col = (int) Math.floor(x / CELL_WIDTH);
-                row = (int) Math.floor(y / CELL_WIDTH);
-            }
-
-            Cell cell = field[row][col];
+            Cell cell = currentCell(x, y);
             MouseButton mouseButton = event.getButton();
-
-            switch (mouseButton){
+            switch (mouseButton) {
                 case PRIMARY:
                     cell.openCell(field, gc);
                     break;
                 case SECONDARY:
                     break;
             }
-
-
-            //     System.out.println("Row " + row + " Column " + col);
         });
 
         for (int y = 0; y < field.length; y++) {
@@ -118,6 +110,38 @@ public class Grid {
                 gc.strokeRect(cell.getX(), cell.getY(), cell.getWidth(), cell.getWidth());
             }
         }
+    }
+
+    private void clearHighlight(GraphicsContext gc, Cell cell, double x, double y) {
+//        System.out.println("Previous cell X " + cell.getX()+ " Y " + cell.getY());
+//        System.out.println("Current mouse X " + x + " Y " + y);
+        if (x <= cell.getX() || x >= cell.getX() + cell.getWidth() || y <= cell.getY() || y >= cell.getY() + cell.getWidth()) {
+//            System.out.println("CHANGED CELL");
+            gc.setStroke(Color.BLACK);
+            gc.strokeRect(cell.getX(), cell.getY(), cell.getWidth(), cell.getWidth());
+        }
+    }
+
+    private Cell currentCell(double x, double y) {
+        int row, col;
+        if (x < CELL_WIDTH && y < CELL_WIDTH) {
+            col = 0;
+            row = 0;
+        } else if (y == GRID_WIDTH - 1 && x == GRID_WIDTH - 1) {
+            col = (int) Math.floor(x / CELL_WIDTH) - 1;
+            row = (int) Math.floor(y / CELL_WIDTH) - 1;
+        } else if (x == GRID_WIDTH - 1) {
+            col = (int) Math.floor(x / CELL_WIDTH) - 1;
+            row = (int) Math.floor(y / CELL_WIDTH);
+        } else if (y == GRID_WIDTH - 1) {
+            col = (int) Math.floor(x / CELL_WIDTH);
+            row = (int) Math.floor(y / CELL_WIDTH) - 1;
+        } else {
+            col = (int) Math.floor(x / CELL_WIDTH);
+            row = (int) Math.floor(y / CELL_WIDTH);
+        }
+//        System.out.println("Row " + row + " Column " + col);
+        return field[row][col];
     }
 
     private class Pair {

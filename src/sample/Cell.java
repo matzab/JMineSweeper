@@ -14,13 +14,15 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 public class Cell {
-    private boolean opened = false;
-    private boolean bomb = false;
+    private boolean opened, bomb, highlighted;
     private int col, row;
     private double x, y, width;
     private int neighbourBombs;
 
     public Cell(double x, double y, double width) {
+        this.opened = false;
+        this.bomb = false;
+        this.highlighted = false;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -31,6 +33,7 @@ public class Cell {
 
     private void drawCell(GraphicsContext gc) {
         gc.setFont(Font.font(Grid.CELL_WIDTH/2));
+        gc.setStroke(Color.BLACK);
         gc.setFill(Color.rgb(150,150,150));
         if (isBomb()) {
             gc.setFill(Color.BLACK);
@@ -42,9 +45,34 @@ public class Cell {
                 gc.setFill(Color.rgb(127,127,127));
             }
             gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
+            gc.strokeRect(getX(), getY(), getWidth(), getWidth());
             gc.strokeText(s, getX() + Grid.CELL_WIDTH * .33, getY() + Grid.CELL_WIDTH * .7);
         }
     }
+
+    public void highLightCell(GraphicsContext gc){
+        gc.setStroke(Color.rgb(150, 150, 150, 0.5));
+        if(isOpened()) {
+            gc.setFont(Font.font(Grid.CELL_WIDTH / 2));
+            gc.setFill(Color.rgb(150, 150, 150, 0.5));
+            if (isBomb()) {
+                gc.setFill(Color.BLACK);
+                gc.fillOval(getX() + Grid.CELL_WIDTH * .25, getY() + Grid.CELL_WIDTH * .25, Grid.CELL_WIDTH / 2, Grid.CELL_WIDTH / 2);
+            } else {
+                String s = "";
+                if (neighbourBombs != 0) {
+                    s = String.valueOf(neighbourBombs);
+                    gc.setFill(Color.rgb(127, 127, 127, 0.5));
+                }
+                gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
+                gc.setStroke(Color.BLACK);
+                gc.strokeText(s, getX() + Grid.CELL_WIDTH * .33, getY() + Grid.CELL_WIDTH * .7);
+            }
+        }else {
+            gc.strokeRect(getX(), getY(), getWidth(), getWidth());
+        }
+    }
+
 
     public boolean isOpened() {
         return opened;
