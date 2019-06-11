@@ -11,6 +11,7 @@ package sample;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public class Cell {
     private boolean opened = false;
@@ -29,15 +30,18 @@ public class Cell {
     }
 
     private void drawCell(GraphicsContext gc) {
-        gc.setFill(Color.GRAY);
+        gc.setFont(Font.font(Grid.CELL_WIDTH/2));
+        gc.setFill(Color.rgb(150,150,150));
         if (isBomb()) {
-            gc.fillOval(getX() + Grid.CELL_WIDTH * .25, getY() + Grid.CELL_WIDTH * .25, 10, 10);
+            gc.setFill(Color.BLACK);
+            gc.fillOval(getX() + Grid.CELL_WIDTH * .25, getY() + Grid.CELL_WIDTH * .25, Grid.CELL_WIDTH/2,Grid.CELL_WIDTH/2);
         } else {
             String s = "";
             if (neighbourBombs != 0) {
                 s = String.valueOf(neighbourBombs);
+                gc.setFill(Color.rgb(127,127,127));
             }
-            gc.fillRect(getX(), getY(), getWidth(), getWidth());
+            gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
             gc.strokeText(s, getX() + Grid.CELL_WIDTH * .33, getY() + Grid.CELL_WIDTH * .7);
         }
     }

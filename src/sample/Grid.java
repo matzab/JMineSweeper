@@ -11,6 +11,8 @@ package sample;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
@@ -75,6 +77,7 @@ public class Grid {
             double x = event.getX();
             double y = event.getY();
 
+
             int row, col;
 
             if (x < CELL_WIDTH && y < CELL_WIDTH) {
@@ -95,9 +98,18 @@ public class Grid {
             }
 
             Cell cell = field[row][col];
-            cell.openCell(field, gc);
+            MouseButton mouseButton = event.getButton();
 
-       //     System.out.println("Row " + row + " Column " + col);
+            switch (mouseButton){
+                case PRIMARY:
+                    cell.openCell(field, gc);
+                    break;
+                case SECONDARY:
+                    break;
+            }
+
+
+            //     System.out.println("Row " + row + " Column " + col);
         });
 
         for (int y = 0; y < field.length; y++) {
