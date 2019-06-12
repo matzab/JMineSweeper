@@ -78,12 +78,13 @@ public class Cell {
         return opened;
     }
 
-    public void openCell(Cell[][] field, GraphicsContext gc) {
+    public boolean openCell(Cell[][] field, GraphicsContext gc) {
         opened = true;
         drawCell(gc);
         if (neighbourBombs == 0) {
             floodFillNeighbours(gc, field);
         }
+        return isBomb();
     }
 
     public boolean isBomb() {

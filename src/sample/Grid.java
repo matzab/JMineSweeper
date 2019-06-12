@@ -19,16 +19,73 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Stack;
 
+
+/**
+ * Beginner mdoe: 10 bombs, 8x8 grid
+ * Intermediate mode: 40 bombs, 16x16 gird
+ * Expert mode: 99 boms, 32x32 grid
+ */
+enum Difficulty{
+    BEGINNER(10,20,161), INTERMEDIATE(40,20,321), EXPERT(99,20,501);
+
+
+
+    private int nBombs;
+    private int cellWidth;
+    private int gridWidth;
+
+    Difficulty(int nBombs, int cellWidth, int gridWidth) {
+        this.nBombs = nBombs;
+        this.cellWidth = cellWidth;
+        this.gridWidth = gridWidth;
+    }
+
+    public int getnBombs() {
+        return nBombs;
+    }
+
+    public void setnBombs(int nBombs) {
+        this.nBombs = nBombs;
+    }
+
+    public int getCellWidth() {
+        return cellWidth;
+    }
+
+    public void setCellWidth(int cellWidth) {
+        this.cellWidth = cellWidth;
+    }
+
+    public int getGridWidth() {
+        return gridWidth;
+    }
+
+    public void setGridWidth(int gridWidth) {
+        this.gridWidth = gridWidth;
+    }
+}
+
+
+/**
+ *
+ *
+ *
+ *
+ *
+ */
 public class Grid {
-    private int totalBombs = 10;
-    public static final int CELL_WIDTH = 20;
-    public static int GRID_WIDTH = 161;
+    private int totalBombs;
+    public static  int CELL_WIDTH;
+    public static int GRID_WIDTH ;
     private int columns;
     private int rows;
     private Cell[][] field;
+    private boolean gameOver;
 
-
-    public Grid(AnchorPane anchorPane) {
+    public Grid(AnchorPane anchorPane, Difficulty difficulty) {
+        this.CELL_WIDTH = difficulty.getCellWidth();
+        this.totalBombs = difficulty.getnBombs();
+        this.GRID_WIDTH = difficulty.getGridWidth();
         rows = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
         columns = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
         field = new Cell[rows][columns];
@@ -38,6 +95,7 @@ public class Grid {
         setupGrid();
         setupCanvas(canvas);
         anchorPane.getChildren().add(canvas);
+        gameOver = false;
     }
 
     private void setupGrid() {
@@ -76,6 +134,7 @@ public class Grid {
         Stack<Cell> cells = new Stack<>();
 
         canvas.setOnMouseMoved(event -> {
+
             double x = event.getX();
             double y = event.getY();
             if (!cells.isEmpty()) {
@@ -90,6 +149,10 @@ public class Grid {
         });
 
         canvas.setOnMouseClicked(event -> {
+            if(gameOver){
+                return;
+            }
+
             double x = event.getX();
             double y = event.getY();
 
@@ -97,7 +160,7 @@ public class Grid {
             MouseButton mouseButton = event.getButton();
             switch (mouseButton) {
                 case PRIMARY:
-                    cell.openCell(field, gc);
+                    gameOver = cell.openCell(field, gc);
                     break;
                 case SECONDARY:
                     break;

@@ -17,6 +17,6 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        grid = new Grid(anchorPane);
+        grid = new Grid(anchorPane, Difficulty.INTERMEDIATE);
     }
 }
