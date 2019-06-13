@@ -11,8 +11,8 @@ package sample;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
@@ -21,14 +21,12 @@ import java.util.Stack;
 
 
 /**
- * Beginner mdoe: 10 bombs, 8x8 grid
- * Intermediate mode: 40 bombs, 16x16 gird
- * Expert mode: 99 boms, 32x32 grid
+ * Beginner mode: 10 bombs, 8 x 8 grid
+ * Intermediate mode: 40 bombs, 16 x 16 gird
+ * Expert mode: 99 bombs, 25 x 25 grid
  */
-enum Difficulty{
-    BEGINNER(10,20,161), INTERMEDIATE(40,20,321), EXPERT(99,20,501);
-
-
+enum Difficulty {
+    BEGINNER(10, 20, 161), INTERMEDIATE(40, 20, 321), EXPERT(99, 15, 376);
 
     private int nBombs;
     private int cellWidth;
@@ -73,29 +71,38 @@ enum Difficulty{
  *
  *
  */
+
+//TODO decouple methods and change drawing to more object orientated structure
+//TODO refactor methods and objects in appropriate classes
+
 public class Grid {
     private int totalBombs;
-    public static  int CELL_WIDTH;
-    public static int GRID_WIDTH ;
+    public static int nFlags;
+    public static int CELL_WIDTH;
+    public static int GRID_WIDTH;
     private int columns;
     private int rows;
     private Cell[][] field;
     private boolean gameOver;
+    private Canvas canvas;
+    private Label flagLabel;
 
-    public Grid(AnchorPane anchorPane, Difficulty difficulty) {
+    public Grid(Canvas canvas, Difficulty difficulty, Label label) {
         this.CELL_WIDTH = difficulty.getCellWidth();
         this.totalBombs = difficulty.getnBombs();
         this.GRID_WIDTH = difficulty.getGridWidth();
+        nFlags = totalBombs;
         rows = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
         columns = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
         field = new Cell[rows][columns];
-        Canvas canvas = new Canvas(GRID_WIDTH, GRID_WIDTH);
+        this.canvas = canvas;
         canvas.setLayoutX(20);
         canvas.setLayoutY(20);
         setupGrid();
         setupCanvas(canvas);
-        anchorPane.getChildren().add(canvas);
         gameOver = false;
+        this.flagLabel = label;
+        updateLabel(nFlags,totalBombs);
     }
 
     private void setupGrid() {
@@ -149,7 +156,7 @@ public class Grid {
         });
 
         canvas.setOnMouseClicked(event -> {
-            if(gameOver){
+            if (gameOver) {
                 return;
             }
 
@@ -160,13 +167,26 @@ public class Grid {
             MouseButton mouseButton = event.getButton();
             switch (mouseButton) {
                 case PRIMARY:
-                    gameOver = cell.openCell(field, gc);
+                    if(!cell.isFlagged()) {
+                        gameOver = cell.openCell(field, gc);
+                    }
                     break;
                 case SECONDARY:
+                    if (!cell.isFlagged() && nFlags > 0) {
+                        cell.drawFlag(gc);
+                        nFlags--;
+                    } else {
+                        if (cell.isFlagged()&& !cell.isOpened()) {
+                            nFlags++;
+                            cell.drawFlag(gc);
+                        }
+                    }
+                    updateLabel(nFlags,totalBombs);
                     break;
             }
         });
 
+        gc.setStroke(Color.BLACK);
         for (int y = 0; y < field.length; y++) {
             for (int x = 0; x < field[y].length; x++) {
                 Cell cell = field[y][x];
@@ -205,6 +225,14 @@ public class Grid {
         }
 //        System.out.println("Row " + row + " Column " + col);
         return field[row][col];
+    }
+
+    private void updateLabel(int remainingFlags, int maxMaxFlags){
+       flagLabel.setText(String.format("%d/%02d ",remainingFlags,maxMaxFlags));
+    }
+
+    public void clearGrid() {
+        canvas.getGraphicsContext2D().clearRect(0, 0, GRID_WIDTH, GRID_WIDTH);
     }
 
     private class Pair {
