@@ -15,7 +15,7 @@ import javafx.scene.text.Font;
 
 public class Cell {
     private boolean opened, bomb, flagged;
-    private int col, row, neighbourBombs, rClickCnt;
+    private int col, row, neighbourBombs;
     private double x, y, width;
 
     public Cell(double x, double y, double width) {
@@ -28,7 +28,6 @@ public class Cell {
         row = (int) Math.floor(y / Grid.CELL_WIDTH);
         col = (int) Math.floor(x / Grid.CELL_WIDTH);
         neighbourBombs = 0;
-        rClickCnt = 0;
     }
 
     private void drawCell(GraphicsContext gc) {
@@ -51,17 +50,16 @@ public class Cell {
     }
 
     public void drawFlag(GraphicsContext gc) {
-        if (!isOpened() && getrClickCnt() == 0) {
+        if (!isOpened() && !isFlagged()) {
             setFlagged(true);
             gc.setStroke(Color.RED);
             gc.strokeLine(getX(), getY(), getX() + getWidth(), getY() + getWidth());
             gc.strokeLine(getX() + getWidth(), getY(), getX(), getY() + getWidth());
-        } else if (!isOpened() && getrClickCnt() == 1) {
+        } else if (!isOpened() && isFlagged()) {
             setFlagged(false);
             gc.setFill(Color.WHITE);
             gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
         }
-        incrementrClickCnt();
     }
 
     public void highLightCell(GraphicsContext gc) {
@@ -86,20 +84,6 @@ public class Cell {
             gc.strokeRect(getX(), getY(), getWidth(), getWidth());
         }
     }
-
-    private int getrClickCnt() {
-        return rClickCnt;
-    }
-
-    private void incrementrClickCnt() {
-        if (!isOpened()) {
-            rClickCnt++;
-        }
-        if (rClickCnt > 1) {
-            rClickCnt = 0;
-        }
-    }
-
 
     public boolean isOpened() {
         return opened;
@@ -158,6 +142,7 @@ public class Cell {
         neighbourBombs = c;
     }
 
+
     private void floodFillNeighbours(GraphicsContext gc, Cell[][] field) {
 
         for (int y = -1; y <= 1; y++) {
@@ -167,7 +152,7 @@ public class Cell {
                 if (xoff >= 0 && xoff < field.length && yoff >= 0 && yoff < field.length) {
                     Cell cell = field[yoff][xoff];
                     if (!cell.isOpened()) {
-                        if(cell.isFlagged()){
+                        if (cell.isFlagged()) {
                             setFlagged(false);
                             Grid.nFlags++;
                         }

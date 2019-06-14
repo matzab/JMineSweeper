@@ -21,59 +21,9 @@ import java.util.Stack;
 
 
 /**
- * Beginner mode: 10 bombs, 8 x 8 grid
- * Intermediate mode: 40 bombs, 16 x 16 gird
- * Expert mode: 99 bombs, 25 x 25 grid
- */
-enum Difficulty {
-    BEGINNER(10, 20, 161), INTERMEDIATE(40, 20, 321), EXPERT(99, 15, 376);
-
-    private int nBombs;
-    private int cellWidth;
-    private int gridWidth;
-
-    Difficulty(int nBombs, int cellWidth, int gridWidth) {
-        this.nBombs = nBombs;
-        this.cellWidth = cellWidth;
-        this.gridWidth = gridWidth;
-    }
-
-    public int getnBombs() {
-        return nBombs;
-    }
-
-    public void setnBombs(int nBombs) {
-        this.nBombs = nBombs;
-    }
-
-    public int getCellWidth() {
-        return cellWidth;
-    }
-
-    public void setCellWidth(int cellWidth) {
-        this.cellWidth = cellWidth;
-    }
-
-    public int getGridWidth() {
-        return gridWidth;
-    }
-
-    public void setGridWidth(int gridWidth) {
-        this.gridWidth = gridWidth;
-    }
-}
-
-
-/**
- *
- *
- *
- *
  *
  */
 
-//TODO decouple methods and change drawing to more object orientated structure
-//TODO refactor methods and objects in appropriate classes
 
 public class Grid {
     private int totalBombs;
@@ -85,9 +35,9 @@ public class Grid {
     private Cell[][] field;
     private boolean gameOver;
     private Canvas canvas;
-    private Label flagLabel;
+    private Label flagLabel, gameOverLabel;
 
-    public Grid(Canvas canvas, Difficulty difficulty, Label label) {
+    public Grid(Canvas canvas, Difficulty difficulty, Label flagLabel, Label gameOverLabel) {
         this.CELL_WIDTH = difficulty.getCellWidth();
         this.totalBombs = difficulty.getnBombs();
         this.GRID_WIDTH = difficulty.getGridWidth();
@@ -96,13 +46,13 @@ public class Grid {
         columns = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
         field = new Cell[rows][columns];
         this.canvas = canvas;
-        canvas.setLayoutX(20);
-        canvas.setLayoutY(20);
         setupGrid();
         setupCanvas(canvas);
         gameOver = false;
-        this.flagLabel = label;
-        updateLabel(nFlags,totalBombs);
+        this.flagLabel = flagLabel;
+        this.gameOverLabel = gameOverLabel;
+        this.gameOverLabel.setVisible(false);
+        updateLabel(nFlags, totalBombs);
     }
 
     private void setupGrid() {
@@ -167,8 +117,12 @@ public class Grid {
             MouseButton mouseButton = event.getButton();
             switch (mouseButton) {
                 case PRIMARY:
-                    if(!cell.isFlagged()) {
+                    if (!cell.isFlagged()) {
                         gameOver = cell.openCell(field, gc);
+                        if (gameOver) {
+                            gameOverLabel.setVisible(true);
+                        }
+                        updateLabel(nFlags, totalBombs);
                     }
                     break;
                 case SECONDARY:
@@ -176,12 +130,12 @@ public class Grid {
                         cell.drawFlag(gc);
                         nFlags--;
                     } else {
-                        if (cell.isFlagged()&& !cell.isOpened()) {
+                        if (cell.isFlagged() && !cell.isOpened()) {
                             nFlags++;
                             cell.drawFlag(gc);
                         }
                     }
-                    updateLabel(nFlags,totalBombs);
+                    updateLabel(nFlags, totalBombs);
                     break;
             }
         });
@@ -227,8 +181,8 @@ public class Grid {
         return field[row][col];
     }
 
-    private void updateLabel(int remainingFlags, int maxMaxFlags){
-       flagLabel.setText(String.format("%d/%02d ",remainingFlags,maxMaxFlags));
+    private void updateLabel(int remainingFlags, int maxMaxFlags) {
+        flagLabel.setText(String.format("%d/%02d ", remainingFlags, maxMaxFlags));
     }
 
     public void clearGrid() {
