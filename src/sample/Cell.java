@@ -25,18 +25,18 @@ public class Cell {
         this.x = x;
         this.y = y;
         this.width = width;
-        row = (int) Math.floor(y / Grid.CELL_WIDTH);
-        col = (int) Math.floor(x / Grid.CELL_WIDTH);
+        row = (int) Math.floor(y / this.width);
+        col = (int) Math.floor(x / this.width);
         neighbourBombs = 0;
     }
 
-    private void drawCell(GraphicsContext gc) {
-        gc.setFont(Font.font(Grid.CELL_WIDTH / 2));
+    public void drawCell(GraphicsContext gc) {
+        gc.setFont(Font.font(width/ 2));
         gc.setStroke(Color.BLACK);
         gc.setFill(Color.rgb(150, 150, 150));
         if (isBomb()) {
             gc.setFill(Color.BLACK);
-            gc.fillOval(getX() + Grid.CELL_WIDTH * .25, getY() + Grid.CELL_WIDTH * .25, Grid.CELL_WIDTH / 2, Grid.CELL_WIDTH / 2);
+            gc.fillOval(getX() + width * .25, getY() + width * .25, width / 2, width / 2);
         } else {
             String s = "";
             if (neighbourBombs != 0) {
@@ -45,7 +45,7 @@ public class Cell {
             }
             gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
             gc.strokeRect(getX(), getY(), getWidth(), getWidth());
-            gc.strokeText(s, getX() + Grid.CELL_WIDTH * .33, getY() + Grid.CELL_WIDTH * .7);
+            gc.strokeText(s, getX() + width * .33, getY() + width * .7);
         }
     }
 
@@ -65,11 +65,11 @@ public class Cell {
     public void highLightCell(GraphicsContext gc) {
         gc.setStroke(Color.rgb(150, 150, 150, 0.5));
         if (isOpened()) {
-            gc.setFont(Font.font(Grid.CELL_WIDTH / 2));
+            gc.setFont(Font.font(width / 2));
             gc.setFill(Color.rgb(150, 150, 150, 0.5));
             if (isBomb()) {
                 gc.setFill(Color.BLACK);
-                gc.fillOval(getX() + Grid.CELL_WIDTH * .25, getY() + Grid.CELL_WIDTH * .25, Grid.CELL_WIDTH / 2, Grid.CELL_WIDTH / 2);
+                gc.fillOval(getX() + width * .25, getY() + width * .25, width / 2, width / 2);
             } else {
                 String s = "";
                 if (neighbourBombs != 0) {
@@ -78,9 +78,19 @@ public class Cell {
                 }
                 gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
                 gc.setStroke(Color.BLACK);
-                gc.strokeText(s, getX() + Grid.CELL_WIDTH * .33, getY() + Grid.CELL_WIDTH * .7);
+                gc.strokeText(s, getX() + width * .33, getY() + width * .7);
             }
         } else {
+            gc.strokeRect(getX(), getY(), getWidth(), getWidth());
+        }
+    }
+
+    public void clearHighlight(GraphicsContext gc, double x, double y) {
+//        System.out.println("Previous cell X " + cell.getX()+ " Y " + cell.getY());
+//        System.out.println("Current mouse X " + row + " Y " + column);
+        if (x <= getX() || x >= getX() + getWidth() || y <= getY() || y >= getY() + getWidth()) {
+//            System.out.println("CHANGED CELL");
+            gc.setStroke(Color.BLACK);
             gc.strokeRect(getX(), getY(), getWidth(), getWidth());
         }
     }
@@ -89,14 +99,6 @@ public class Cell {
         return opened;
     }
 
-    public boolean openCell(Cell[][] field, GraphicsContext gc) {
-        opened = true;
-        drawCell(gc);
-        if (neighbourBombs == 0) {
-            floodFillNeighbours(gc, field);
-        }
-        return isBomb();
-    }
 
     public boolean isBomb() {
         return bomb;
@@ -118,6 +120,34 @@ public class Cell {
         return width;
     }
 
+    public int getCol() {
+        return col;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public void setOpened(boolean opened) {
+        this.opened = opened;
+    }
+
+    public int getNeighbourBombs() {
+        return neighbourBombs;
+    }
+
+    public void setNeighbourBombs(int neighbourBombs) {
+        this.neighbourBombs = neighbourBombs;
+    }
+
     public boolean isFlagged() {
         return flagged;
     }
@@ -126,40 +156,4 @@ public class Cell {
         this.flagged = flagged;
     }
 
-    public void countNeighbourBombs(Cell[][] field) {
-        int c = 0;
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                int xoff = x + col;
-                int yoff = y + row;
-                if (xoff >= 0 && xoff < field.length && yoff >= 0 && yoff < field.length) {
-                    if (field[yoff][xoff].isBomb()) {
-                        c++;
-                    }
-                }
-            }
-        }
-        neighbourBombs = c;
-    }
-
-
-    private void floodFillNeighbours(GraphicsContext gc, Cell[][] field) {
-
-        for (int y = -1; y <= 1; y++) {
-            for (int x = -1; x <= 1; x++) {
-                int xoff = x + col;
-                int yoff = y + row;
-                if (xoff >= 0 && xoff < field.length && yoff >= 0 && yoff < field.length) {
-                    Cell cell = field[yoff][xoff];
-                    if (!cell.isOpened()) {
-                        if (cell.isFlagged()) {
-                            setFlagged(false);
-                            Grid.nFlags++;
-                        }
-                        cell.openCell(field, gc);
-                    }
-                }
-            }
-        }
-    }
 }

@@ -26,15 +26,15 @@ import java.util.Stack;
 
 
 public class Grid {
-    private int totalBombs;
-    public static int nFlags;
-    public static int CELL_WIDTH;
-    public static int GRID_WIDTH;
+    private int totalBombs, nFlags;
+    private int CELL_WIDTH;
+    private int GRID_WIDTH;
     private int columns;
     private int rows;
     private Cell[][] field;
     private boolean gameOver;
     private Canvas canvas;
+    private GraphicsContext gc;
     private Label flagLabel, gameOverLabel;
 
     public Grid(Canvas canvas, Difficulty difficulty, Label flagLabel, Label gameOverLabel) {
@@ -46,6 +46,7 @@ public class Grid {
         columns = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
         field = new Cell[rows][columns];
         this.canvas = canvas;
+        gc = canvas.getGraphicsContext2D();
         setupGrid();
         setupCanvas(canvas);
         gameOver = false;
@@ -61,7 +62,7 @@ public class Grid {
 
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < columns; x++) {
-                bombs.add(new Pair(x, y));
+                bombs.add(new Pair(y, x));
             }
         }
 
@@ -75,28 +76,28 @@ public class Grid {
         for (int c = 0; c < totalBombs; c++) {
             int index = random.nextInt(bombs.size());
             Pair pair = bombs.get(index);
-            field[pair.column][pair.row].setBomb(true);
+            field[pair.row][pair.column].setBomb(true);
             bombs.remove(pair);
         }
 
         for (int y = 0; y < field.length; y++) {
             for (int x = 0; x < field[y].length; x++) {
-                field[y][x].countNeighbourBombs(field);
+                countNeighbourBombs(field[y][x]);
             }
         }
     }
 
     private void setupCanvas(Canvas canvas) {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
         Stack<Cell> cells = new Stack<>();
 
         canvas.setOnMouseMoved(event -> {
 
             double x = event.getX();
             double y = event.getY();
+
             if (!cells.isEmpty()) {
                 Cell tmp = cells.pop();
-                clearHighlight(gc, tmp, x, y);
+                tmp.clearHighlight(gc, x, y);
             }
             Cell cell = currentCell(x, y);
             cell.highLightCell(gc);
@@ -117,13 +118,13 @@ public class Grid {
             MouseButton mouseButton = event.getButton();
             switch (mouseButton) {
                 case PRIMARY:
-                    if (!cell.isFlagged()) {
-                        gameOver = cell.openCell(field, gc);
-                        if (gameOver) {
-                            gameOverLabel.setVisible(true);
-                        }
-                        updateLabel(nFlags, totalBombs);
+                    openCell(cell);
+                    if (gameOver) {
+                        gameOverLabel.setVisible(true);
+                        return;
                     }
+
+                    updateLabel(nFlags, totalBombs);
                     break;
                 case SECONDARY:
                     if (!cell.isFlagged() && nFlags > 0) {
@@ -146,16 +147,6 @@ public class Grid {
                 Cell cell = field[y][x];
                 gc.strokeRect(cell.getX(), cell.getY(), cell.getWidth(), cell.getWidth());
             }
-        }
-    }
-
-    private void clearHighlight(GraphicsContext gc, Cell cell, double x, double y) {
-//        System.out.println("Previous cell X " + cell.getX()+ " Y " + cell.getY());
-//        System.out.println("Current mouse X " + x + " Y " + y);
-        if (x <= cell.getX() || x >= cell.getX() + cell.getWidth() || y <= cell.getY() || y >= cell.getY() + cell.getWidth()) {
-//            System.out.println("CHANGED CELL");
-            gc.setStroke(Color.BLACK);
-            gc.strokeRect(cell.getX(), cell.getY(), cell.getWidth(), cell.getWidth());
         }
     }
 
@@ -189,10 +180,58 @@ public class Grid {
         canvas.getGraphicsContext2D().clearRect(0, 0, GRID_WIDTH, GRID_WIDTH);
     }
 
+    private void openCell(Cell cell) {
+        cell.setOpened(true);
+        if (cell.isBomb()) {
+            gameOver = true;
+            return;
+        }
+        cell.drawCell(gc);
+        if (cell.getNeighbourBombs() == 0) {
+            floodFillNeighbours(cell);
+        }
+    }
+
+    private void floodFillNeighbours(Cell cell) {
+
+        for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+                int xoff = x + cell.getCol();
+                int yoff = y + cell.getRow();
+                if (xoff >= 0 && xoff < field.length && yoff >= 0 && yoff < field.length) {
+                    Cell tmpCell = field[yoff][xoff];
+                    if (!tmpCell.isOpened()) {
+                        if (tmpCell.isFlagged()) {
+                            tmpCell.setFlagged(false);
+                            nFlags++;
+                        }
+                        openCell(tmpCell);
+                    }
+                }
+            }
+        }
+    }
+
+    private void countNeighbourBombs(Cell cell) {
+        int c = 0;
+        for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+                int xoff = x + cell.getCol();
+                int yoff = y + cell.getRow();
+                if (xoff >= 0 && xoff < field.length && yoff >= 0 && yoff < field.length) {
+                    if (field[yoff][xoff].isBomb()) {
+                        c++;
+                    }
+                }
+            }
+        }
+        cell.setNeighbourBombs(c);
+    }
+
     private class Pair {
         int column, row;
 
-        private Pair(int column, int row) {
+        private Pair(int row, int column) {
             this.column = column;
             this.row = row;
         }

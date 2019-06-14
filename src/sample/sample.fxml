@@ -16,7 +16,7 @@
       <Button fx:id="restartGame" layoutX="417.0" layoutY="49.0" mnemonicParsing="false" text="Restart" />
       <Label layoutX="417.0" layoutY="23.0" text="Remaining flags:" />
       <Label fx:id="remainingFlagsLabel" layoutX="521.0" layoutY="23.0" prefHeight="17.0" prefWidth="53.0" />
-      <ComboBox fx:id="difficultyComboBox" layoutX="20.0" layoutY="10.0" prefHeight="25.0" prefWidth="161.0" />
+      <ComboBox fx:id="difficultyComboBox" layoutX="20.0" layoutY="10.0" prefHeight="25.0" prefWidth="200.0" />
       <Label fx:id="gameOverLabel" layoutX="417.0" layoutY="94.0" prefHeight="70.0" prefWidth="161.0" text="GAME OVER" visible="false">
          <font>
             <Font size="24.0" />

@@ -46,11 +46,7 @@ public class Controller implements Initializable {
 
         difficultyComboBox.setOnAction((Event ev) -> {
             gameDifficulty = (Difficulty) difficultyComboBox.getSelectionModel().getSelectedItem();
-            grid.clearGrid();
-            canvas.setWidth(gameDifficulty.getGridWidth());
-            canvas.setHeight(gameDifficulty.getGridWidth());
-            grid = new Grid(canvas, gameDifficulty, remainingFlagsLabel, gameOverLabel);
-
+            resetGrid();
             Stage root = (Stage) ((Node) ev.getSource()).getScene().getWindow();
             root.setHeight(gameDifficulty.getGridWidth() + 100);
         });
@@ -60,12 +56,16 @@ public class Controller implements Initializable {
         grid = new Grid(canvas, gameDifficulty, remainingFlagsLabel, gameOverLabel);
 
         restartGame.setOnMouseClicked(event -> {
-            grid.clearGrid();
-            canvas.setWidth(gameDifficulty.getGridWidth());
-            canvas.setHeight(gameDifficulty.getGridWidth());
-            grid = new Grid(canvas, gameDifficulty, remainingFlagsLabel, gameOverLabel);
+           resetGrid();
         });
     }
 
+
+    private void resetGrid(){
+        grid.clearGrid();
+        canvas.setWidth(gameDifficulty.getGridWidth());
+        canvas.setHeight(gameDifficulty.getGridWidth());
+        grid = new Grid(canvas, gameDifficulty, remainingFlagsLabel, gameOverLabel);
+    }
 
 }
