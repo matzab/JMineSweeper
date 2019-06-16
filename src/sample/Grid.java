@@ -26,11 +26,7 @@ import java.util.Stack;
 
 
 public class Grid {
-    private int totalBombs, nFlags;
-    private int CELL_WIDTH;
-    private int GRID_WIDTH;
-    private int columns;
-    private int rows;
+    private int totalBombs, nFlags, cellWidth, gridWidth,columns, rows, openedCells, totalCells;
     private Cell[][] field;
     private boolean gameOver;
     private Canvas canvas;
@@ -38,12 +34,12 @@ public class Grid {
     private Label flagLabel, gameOverLabel;
 
     public Grid(Canvas canvas, Difficulty difficulty, Label flagLabel, Label gameOverLabel) {
-        this.CELL_WIDTH = difficulty.getCellWidth();
+        this.cellWidth = difficulty.getCellWidth();
         this.totalBombs = difficulty.getnBombs();
-        this.GRID_WIDTH = difficulty.getGridWidth();
+        this.gridWidth = difficulty.getGridWidth();
         nFlags = totalBombs;
-        rows = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
-        columns = (int) Math.floor(GRID_WIDTH / CELL_WIDTH);
+        rows = (int) Math.floor(gridWidth / cellWidth);
+        columns = (int) Math.floor(gridWidth / cellWidth);
         field = new Cell[rows][columns];
         this.canvas = canvas;
         gc = canvas.getGraphicsContext2D();
@@ -54,6 +50,8 @@ public class Grid {
         this.gameOverLabel = gameOverLabel;
         this.gameOverLabel.setVisible(false);
         updateLabel(nFlags, totalBombs);
+        totalCells = rows*columns;
+        openedCells=0;
     }
 
     private void setupGrid() {
@@ -68,7 +66,7 @@ public class Grid {
 
         for (int y = 0; y < field.length; y++) {
             for (int x = 0; x < field[y].length; x++) {
-                Cell cell = new Cell(x * CELL_WIDTH, y * CELL_WIDTH, CELL_WIDTH);
+                Cell cell = new Cell(x * cellWidth, y * cellWidth, cellWidth);
                 field[y][x] = cell;
             }
         }
@@ -118,15 +116,18 @@ public class Grid {
             MouseButton mouseButton = event.getButton();
             switch (mouseButton) {
                 case PRIMARY:
-                    openCell(cell);
-                    if (gameOver) {
-                        gameOverLabel.setVisible(true);
-                        return;
-                    }
+                    if(!cell.isOpened()) {
+                        openCell(cell);
+                        if (gameOver) {
+                            gameOverLabel.setVisible(true);
+                            return;
+                        }
 
-                    updateLabel(nFlags, totalBombs);
+                        updateLabel(nFlags, totalBombs);
+                    }
                     break;
                 case SECONDARY:
+
                     if (!cell.isFlagged() && nFlags > 0) {
                         cell.drawFlag(gc);
                         nFlags--;
@@ -138,6 +139,10 @@ public class Grid {
                     }
                     updateLabel(nFlags, totalBombs);
                     break;
+            }
+
+            if(openedCells==(totalCells-totalBombs) && (nFlags==0)) {
+                win();
             }
         });
 
@@ -152,21 +157,21 @@ public class Grid {
 
     private Cell currentCell(double x, double y) {
         int row, col;
-        if (x < CELL_WIDTH && y < CELL_WIDTH) {
+        if (x < cellWidth && y < cellWidth) {
             col = 0;
             row = 0;
-        } else if (y == GRID_WIDTH - 1 && x == GRID_WIDTH - 1) {
-            col = (int) Math.floor(x / CELL_WIDTH) - 1;
-            row = (int) Math.floor(y / CELL_WIDTH) - 1;
-        } else if (x == GRID_WIDTH - 1) {
-            col = (int) Math.floor(x / CELL_WIDTH) - 1;
-            row = (int) Math.floor(y / CELL_WIDTH);
-        } else if (y == GRID_WIDTH - 1) {
-            col = (int) Math.floor(x / CELL_WIDTH);
-            row = (int) Math.floor(y / CELL_WIDTH) - 1;
+        } else if (y == gridWidth - 1 && x == gridWidth - 1) {
+            col = (int) Math.floor(x / cellWidth) - 1;
+            row = (int) Math.floor(y / cellWidth) - 1;
+        } else if (x == gridWidth - 1) {
+            col = (int) Math.floor(x / cellWidth) - 1;
+            row = (int) Math.floor(y / cellWidth);
+        } else if (y == gridWidth - 1) {
+            col = (int) Math.floor(x / cellWidth);
+            row = (int) Math.floor(y / cellWidth) - 1;
         } else {
-            col = (int) Math.floor(x / CELL_WIDTH);
-            row = (int) Math.floor(y / CELL_WIDTH);
+            col = (int) Math.floor(x / cellWidth);
+            row = (int) Math.floor(y / cellWidth);
         }
 //        System.out.println("Row " + row + " Column " + col);
         return field[row][col];
@@ -177,11 +182,12 @@ public class Grid {
     }
 
     public void clearGrid() {
-        canvas.getGraphicsContext2D().clearRect(0, 0, GRID_WIDTH, GRID_WIDTH);
+        canvas.getGraphicsContext2D().clearRect(0, 0, gridWidth, gridWidth);
     }
 
     private void openCell(Cell cell) {
         cell.setOpened(true);
+        openedCells++;
         if (cell.isBomb()) {
             gameOver = true;
             return;
@@ -190,6 +196,12 @@ public class Grid {
         if (cell.getNeighbourBombs() == 0) {
             floodFillNeighbours(cell);
         }
+    }
+
+    private void win(){
+            gameOver = true;
+            gameOverLabel.setText("You win!");
+            gameOverLabel.setVisible(true);
     }
 
     private void floodFillNeighbours(Cell cell) {
