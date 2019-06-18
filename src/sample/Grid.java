@@ -26,7 +26,7 @@ import java.util.Stack;
 
 
 public class Grid {
-    private int totalBombs, nFlags, cellWidth, gridWidth,columns, rows, openedCells, totalCells;
+    private int totalBombs, nFlags, cellWidth, gridWidth, columns, rows, openedCells, totalCells;
     private Cell[][] field;
     private boolean gameOver;
     private Canvas canvas;
@@ -50,8 +50,8 @@ public class Grid {
         this.gameOverLabel = gameOverLabel;
         this.gameOverLabel.setVisible(false);
         updateLabel(nFlags, totalBombs);
-        totalCells = rows*columns;
-        openedCells=0;
+        totalCells = rows * columns;
+        openedCells = 0;
     }
 
     private void setupGrid() {
@@ -116,7 +116,7 @@ public class Grid {
             MouseButton mouseButton = event.getButton();
             switch (mouseButton) {
                 case PRIMARY:
-                    if(!cell.isOpened()) {
+                    if (!cell.isOpened()) {
                         openCell(cell);
                         if (gameOver) {
                             gameOverLabel.setVisible(true);
@@ -141,7 +141,7 @@ public class Grid {
                     break;
             }
 
-            if(openedCells==(totalCells-totalBombs) && (nFlags==0)) {
+            if (openedCells == (totalCells - totalBombs) && (nFlags == 0)) {
                 win();
             }
         });
@@ -198,10 +198,10 @@ public class Grid {
         }
     }
 
-    private void win(){
-            gameOver = true;
-            gameOverLabel.setText("You win!");
-            gameOverLabel.setVisible(true);
+    private void win() {
+        gameOver = true;
+        gameOverLabel.setText("You win!");
+        gameOverLabel.setVisible(true);
     }
 
     private void floodFillNeighbours(Cell cell) {

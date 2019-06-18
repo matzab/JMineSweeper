@@ -31,7 +31,7 @@ public class Cell {
     }
 
     public void drawCell(GraphicsContext gc) {
-        gc.setFont(Font.font(width/ 2));
+        gc.setFont(Font.font(width / 2));
         gc.setStroke(Color.BLACK);
         gc.setFill(Color.rgb(150, 150, 150));
         if (isBomb()) {
@@ -63,26 +63,8 @@ public class Cell {
     }
 
     public void highLightCell(GraphicsContext gc) {
-        gc.setStroke(Color.rgb(150, 150, 150, 0.5));
-        if (isOpened()) {
-            gc.setFont(Font.font(width / 2));
-            gc.setFill(Color.rgb(150, 150, 150, 0.5));
-            if (isBomb()) {
-                gc.setFill(Color.BLACK);
-                gc.fillOval(getX() + width * .25, getY() + width * .25, width / 2, width / 2);
-            } else {
-                String s = "";
-                if (neighbourBombs != 0) {
-                    s = String.valueOf(neighbourBombs);
-                    gc.setFill(Color.rgb(127, 127, 127, 0.5));
-                }
-                gc.fillRect(getX(), getY(), getWidth() - 1, getWidth() - 1);
-                gc.setStroke(Color.BLACK);
-                gc.strokeText(s, getX() + width * .33, getY() + width * .7);
-            }
-        } else {
-            gc.strokeRect(getX(), getY(), getWidth(), getWidth());
-        }
+        gc.setStroke(Color.VIOLET);
+        gc.strokeRect(getX(), getY(), getWidth(), getWidth());
     }
 
     public void clearHighlight(GraphicsContext gc, double x, double y) {

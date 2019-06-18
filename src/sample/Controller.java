@@ -16,9 +16,6 @@ import java.util.ResourceBundle;
 
 
 //TODO add timer
-//TODO add win condition
-//TODO refactor code to reflect OOP/functional programming
-//TODO add comments
 
 public class Controller implements Initializable {
     @FXML
